@@ -57,3 +57,22 @@ Returned pagination parameter 'after' was 'None' = No more posts! Breaking from 
 
 Done. Written 2 comments to file 'Stegoserious.json' (6176 bytes).
 ```
+
+
+# JSON processing
+
+all comments end up in one file which can then be post-processed, e.g. with jq:
+
+show all dates:
+
+    cat comments.json | jq ".[] | .data.created_utc" | xargs -i date -d "@{}" "+%F" | sort | uniq
+
+all links:
+
+    cat  comments.json | jq '.[] | .data.permalink'
+
+subreddit names + post titles
+
+    cat comments.json | jq '.[] | .data.subreddit +" | " + .data.link_title '
+
+etc. Please add more, thanks.
