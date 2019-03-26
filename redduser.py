@@ -23,7 +23,7 @@ DEFAULTS = {"days"       : 2,  # how many days into the past?
             "user"       : "andreaskrueger", # me, I have written this for myself, lol
             "bodyhead"   : 40, # print first x character of each post in statusline (0 for None)
             "sr_name_len": 12, # statusline: cut subreddit name after x characters  
-            "limit"      : 4 } # comments per pagination - low for testing, high for production, max 100
+            "limit"      : 10 } # comments per pagination - low for testing, high for production, max 100
 assert DEFAULTS["limit"]<=100
 
 HEADERS = {'User-agent': 'redduser v0.1'} # otherwise <Response Error: 429> 
