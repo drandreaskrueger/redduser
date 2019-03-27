@@ -1,0 +1,18 @@
+{
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Age": 43,
+  "Address": {
+    "Street": "Downing Street 10",
+    "City": "London",
+    "Country": "Great Britain"
+  },
+  "PhoneNumbers": [
+    "+44 1234567",
+    "+44 2345678"
+  ],
+  "example_from": {
+    "stackoverflow": "https://stackoverflow.com/questions/30292752/how-do-i-parse-a-json-file",
+    "serde.rs": "https://github.com/serde-rs/json"
+  }
+}
