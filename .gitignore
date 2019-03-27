@@ -1,3 +1,10 @@
+# rust cargo:
+/target
+**/*.rs.bk
+
+# added by andreas:
+*comments.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -104,4 +111,3 @@ venv.bak/
 .mypy_cache/
 
 
-*comments.json

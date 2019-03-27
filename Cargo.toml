@@ -1,0 +1,7 @@
+[package]
+name = "redduser"
+version = "0.1.0"
+authors = ["andreas"]
+edition = "2018"
+
+[dependencies]
