@@ -74,6 +74,8 @@ fn read_my_comments() {
     //println!("first element:\nutc: {}", json[0]["data"]["created_utc"]  );
     // println!("all elements:");
 
+    let mut urls : Vec<String> = [].to_vec();
+
     for comment in json.iter() {
         println!();
         let data = &comment["data"]; // shortcut reference
@@ -87,8 +89,17 @@ fn read_my_comments() {
 
         println!("{} name:{} link:{} parent:{}", ts, data["name"], data["link_id"], data["parent_id"]  );
 
-        let url = parent_url(&data);
+        urls.extend ( parent_url(&data) );
     }
+
+    // deduplicate:
+
+    println!("\n{:?}", urls);
+    println!("number of urls: {}", urls.len());
+    println!("dedup");
+    urls.sort_unstable();
+    urls.dedup();
+    println!("number of urls: {}", urls.len());
 }
 
 fn string_from_value(data : &Value) -> String {
@@ -106,24 +117,26 @@ const API_GET_T3_LINK    : &str = "/by_id/{}/.json"; // e.g. https://www.reddit.
 const API_GET_T1_COMMENT : &str = "/comments/{}/-/{}/.json"; // e.g. https://www.reddit.com/comments/b5ymaf/-/ejhbxes/.json
 
 
-fn parent_url(data : &Value) -> String{
+// fn parent_url(data : &Value) -> String{
+fn parent_url(data : &Value) -> Vec<String>{  // not String but Vec because answer can be 1 or 2 URLs
 
     let parent_id = string_from_value(& data["parent_id"]);
     let link_id = string_from_value(& data["link_id"]);
 
-    let mut url = String::from(REDDIT);
+    let mut urls : Vec<String> = [].to_vec();
 
     if &parent_id[0..3] == "t1_" {
         print!("COMMENT parent {} --> ", &parent_id[3..]);
-        url += &format!("/comments/{}/-/{}/.json", &link_id[3..], &parent_id[3..]); // sad, format!() does not seem to take constants
+        urls.push(String::from(REDDIT) +  &format!("/comments/{}/-/{}/.json", &link_id[3..], &parent_id[3..]) ); // sad, format!() does not seem to take constants
+        urls.push( String::from(REDDIT) + &format!("/by_id/{}/.json", &link_id) ); // also get the root of this thread
     };
     if &parent_id[0..3] == "t3_" {
         print!("LINK parent {} --> ", parent_id);
-        url += &format!("/by_id/{}/.json", &parent_id);
+        urls.push( String::from(REDDIT) + &format!("/by_id/{}/.json", &parent_id) );
     }
-    println!("{}", url);
+    println!("{:?}", urls);
 
-    url
+    urls
 }
 
 fn utc(epochtime : u64) -> String{
