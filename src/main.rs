@@ -64,6 +64,8 @@ fn json_example() {
     println!("{:?}", json);
 }
 
+// not completely unstructured - we know it's a list of json things, so make them a vec:
+
 fn read_my_comments() {
     let json = read_json_file_unstructured(String::from("comments.json"));
     let json = json.as_array().unwrap().to_vec(); // we know that the json file is a list --> Vec
@@ -73,15 +75,56 @@ fn read_my_comments() {
     // println!("all elements:");
 
     for comment in json.iter() {
-        let data = &comment["data"];
+        println!();
+        let data = &comment["data"]; // shortcut reference
 
-        let epoch : f64 = serde_json::from_value(data["created_utc"].clone()).unwrap(); // wow that is strangely complicated
+        let created_utc = data["created_utc"].clone(); // wow this is strangely complicated
+        let epoch : f64 = serde_json::from_value(created_utc).unwrap();
+        // but these don't work (please tell me if you know a better way, me rust newbie):
+        // let epoch : f64 = serde_json::from_value(data["created_utc"]).unwrap(); // cannot move out of borrowed content
+        // let epoch : f64 = serde_json::from_value(&data["created_utc"]).unwrap(); // expected enum `serde_json::value::Value`, found reference
         let ts = utc(epoch as u64);
 
-        println!("{} name:{} parent:{}", ts, data["name"], data["parent_id"]  );
+        println!("{} name:{} link:{} parent:{}", ts, data["name"], data["link_id"], data["parent_id"]  );
+
+        let url = parent_url(&data);
     }
 }
 
+fn string_from_value(data : &Value) -> String {
+    // is there an easier way than this ??
+    // Looks like I have to do this for each and every element that I take out of the json??
+    // why do I always have to clone the value 'data'??
+    // IMHO there should be another fn like: serde_json::from_value_ref(&Value)
+    let answer : String = serde_json::from_value(data.clone()).unwrap();
+    answer
+}
+
+const REDDIT : &str = "https://www.reddit.com";
+// sadly, format!(...) does not accept these consts, or what am I doing wrong?
+const API_GET_T3_LINK    : &str = "/by_id/{}/.json"; // e.g. https://www.reddit.com/by_id/t3_b62s8t/.json
+const API_GET_T1_COMMENT : &str = "/comments/{}/-/{}/.json"; // e.g. https://www.reddit.com/comments/b5ymaf/-/ejhbxes/.json
+
+
+fn parent_url(data : &Value) -> String{
+
+    let parent_id = string_from_value(& data["parent_id"]);
+    let link_id = string_from_value(& data["link_id"]);
+
+    let mut url = String::from(REDDIT);
+
+    if &parent_id[0..3] == "t1_" {
+        print!("COMMENT parent {} --> ", &parent_id[3..]);
+        url += &format!("/comments/{}/-/{}/.json", &link_id[3..], &parent_id[3..]); // sad, format!() does not seem to take constants
+    };
+    if &parent_id[0..3] == "t3_" {
+        print!("LINK parent {} --> ", parent_id);
+        url += &format!("/by_id/{}/.json", &parent_id);
+    }
+    println!("{}", url);
+
+    url
+}
 
 fn utc(epochtime : u64) -> String{
     // Creates a new SystemTime from the specified number of whole seconds
