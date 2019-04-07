@@ -144,6 +144,20 @@ fn sort_and_deduplicate(mut strvec : Vec<String>) {
 
 }
 
+fn download_json_extract_data_object(url: &String) {  //-> Value{
+    // let body = reqwest::get("https://www.rust-lang.org").unwrap().text();
+    let mut answer = reqwest::get(url).unwrap();
+    // let body  = answer.text().unwrap();
+    // let json : Value = serde_json::from_str(&body).unwrap();
+    let json : Value = answer.json().unwrap();
+    println!("body = {:?}", json);
+
+    let json_vec = json.as_array().unwrap().to_vec(); // we know the json file is a list --> Vec
+    println!("number of comments: {}", json_vec.len());
+
+    let obj = &json["data"];
+    println!("obj = {:?}", obj);
+}
 
 fn read_my_comments_and_create_ancestor_urls() {
     let json = read_json_file_unstructured(String::from("comments.json"));
@@ -160,13 +174,12 @@ fn read_my_comments_and_create_ancestor_urls() {
 
 }
 
-
-
 fn main() {
     // println!("Hello, world!");
     // json_example();
 
     read_my_comments_and_create_ancestor_urls();
 
-
+    // download_json_extract_data_object(&String::from("https://www.reddit.com/by_id/t3_ba2a3a/.json"));
+    // download_json_extract_data_object(&String::from("https://www.reddit.com/comments/ba2a3a/-/ek8kc0n/.json"));
 }
