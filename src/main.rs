@@ -64,7 +64,6 @@ fn json_example() {
     println!("{:?}", json);
 }
 
-// not completely unstructured - we know it's a list of json things, so make them a vec:
 
 
 fn utc(epochtime: u64) -> String {
@@ -109,39 +108,40 @@ const REDDIT: &str = "https://www.reddit.com";
 const API_GET_T3_LINK: &str = "/by_id/{}/.json"; // e.g. https://www.reddit.com/by_id/t3_b62s8t/.json
 const API_GET_T1_COMMENT: &str = "/comments/{}/-/{}/.json"; // e.g. https://www.reddit.com/comments/b5ymaf/-/ejhbxes/.json
 
-fn ancestor_urls(data: &Value) -> Vec<String> {
+fn ancestor_urls(data: &Value) -> (String,String){
     // not String but Vec because answer can be 1 or 2 URLs
 
     let parent_id = string_from_value(&data["parent_id"]);
     let link_id = string_from_value(&data["link_id"]);
 
-    let mut urls: Vec<String> = [].to_vec();
+    let mut comment = String::from("");
+    let mut thread_op = String::from("");
 
     match &parent_id[0..3] {
         "t1_" => {
-            print!("COMMENT parent {} --> ", &parent_id[3..]);
-            urls.push(String::from(REDDIT) + &format!("/comments/{}/-/{}/.json", &link_id[3..], &parent_id[3..]));
-            urls.push(String::from(REDDIT) + &format!("/by_id/{}/.json", &link_id)); // also OP of this thread
+            print!("parent COMMENT {} and ancestor THREAD-OP --> ", &parent_id[3..]);
+            comment = String::from(REDDIT) + &format!("/comments/{}/-/{}/.json", &link_id[3..], &parent_id[3..]);
+            thread_op = String::from(REDDIT) + &format!("/by_id/{}/.json", &link_id); // also OP of this thread
         }
         "t3_" => {
-            print!("LINK parent {} --> ", parent_id);
-            urls.push(String::from(REDDIT) + &format!("/by_id/{}/.json", &parent_id));
+            print!("parent THREAD-OP {} --> ", parent_id);
+            thread_op = String::from(REDDIT) + &format!("/by_id/{}/.json", &parent_id);
         }
         _ => print!("WARN: id type not implemented yet: '{}'. Skipping this. --> ", parent_id)
     }
-    println!("{:?}", urls);
+    println!("{} {}", comment, thread_op);
 
-    urls
+    (comment,thread_op)
 }
 
-fn sort_and_deduplicate(mut strvec : Vec<String>) {
+fn sort_and_deduplicate_and_remove_empty(strvec : &mut Vec<String>) {
     // deduplicate:
     print!("number of strings: {} ", strvec.len());
     print!("... dedup ... ");
-    strvec.sort_unstable();
-    strvec.dedup();
+    strvec.sort_unstable(); // sort, needed for dedup
+    strvec.dedup(); // remove all duplicates
+    //strvec.retain(|x| x != ""); // keep all non-empty
     println!("number of strings: {}", strvec.len());
-
 }
 
 fn download_json_extract_data_object(url: &String) {  //-> Value{
@@ -150,27 +150,34 @@ fn download_json_extract_data_object(url: &String) {  //-> Value{
     // let body  = answer.text().unwrap();
     // let json : Value = serde_json::from_str(&body).unwrap();
     let json : Value = answer.json().unwrap();
-    println!("body = {:?}", json);
+    // println!("body = {:?}", json);
 
     let json_vec = json.as_array().unwrap().to_vec(); // we know the json file is a list --> Vec
     println!("number of comments: {}", json_vec.len());
 
     let obj = &json["data"];
-    println!("obj = {:?}", obj);
+    // println!("obj = {:?}", obj);
 }
 
 fn read_my_comments_and_create_ancestor_urls() {
     let json = read_json_file_unstructured(String::from("comments.json"));
-    let json_vec = json.as_array().unwrap().to_vec(); // we know the json file is a list --> Vec
+    let json_vec = json.as_array().unwrap().to_vec(); // a list of json things, so make them a vec
     println!("number of comments: {}", json_vec.len());
 
-    let mut urls: Vec<String> = [].to_vec();
+    let mut comments: Vec<String> = [].to_vec();
+    let mut thread_ops: Vec<String> = [].to_vec();
+
     for comment in json_vec.iter() {
         let data = get_data_from_comment_json_and_print_statusline(&comment);
-        urls.extend( ancestor_urls(&data) );
+        let (comment, thread_op) = ancestor_urls(&data);
+        comments.push(comment);
+        thread_ops.push(thread_op);
     }
-    println!("\n{:?}", urls);
-    sort_and_deduplicate(urls);
+    println!("\ncomments: {:?}", comments);
+    sort_and_deduplicate_and_remove_empty(&mut comments);
+    // println!("\ncomments: {:?}", comments);
+    println!("\nthread_ops: {:?}", thread_ops);
+    sort_and_deduplicate_and_remove_empty(&mut thread_ops);
 
 }
 
@@ -181,5 +188,5 @@ fn main() {
     read_my_comments_and_create_ancestor_urls();
 
     // download_json_extract_data_object(&String::from("https://www.reddit.com/by_id/t3_ba2a3a/.json"));
-    // download_json_extract_data_object(&String::from("https://www.reddit.com/comments/ba2a3a/-/ek8kc0n/.json"));
+    download_json_extract_data_object(&String::from("https://www.reddit.com/comments/ba2a3a/-/ek8kc0n/.json"));
 }
