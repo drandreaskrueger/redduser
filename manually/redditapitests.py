@@ -81,7 +81,7 @@ def comments():
     checkManyComments()
 
 def understandThreadOpFormat(url):
-    print (url)
+    print ("\n" + url)
     r=requests.get(url, headers=HEADERS)
     j=r.json()
     print ("type(j)=%s | len(j)=%d" % (type(j).__name__,len(j)))
@@ -121,13 +121,15 @@ def threadops():
     print ("\nThread OPs:\n")
     # understandCommentsFormat("https://www.reddit.com/by_id/t3_b9zbs7/.json")
     understandThreadOpFormat("https://www.reddit.com/by_id/t3_b9zbs7/.json")
+    understandThreadOpFormat("https://www.reddit.com/by_id/t3_be9bnd/.json") # deleted post
     print ()
     checkManyThreadOps()
 
 def main():
-    comments()
-    print ("\n" + 50*"#" +"\n")
     threadops()
+    print ("\n" + 50*"#" +"\n")
+    comments()
+
 
 if __name__ == '__main__':
     main()
