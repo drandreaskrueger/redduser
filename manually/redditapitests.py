@@ -60,7 +60,7 @@ def understandCommentsFormat(url):
         print ("body: %s" % (data["body"]))
     print (50*"-" +"\n")
 
-def checkManyComments(jsonfile="comments.json"):
+def checkManyComments(jsonfile="../comments.json"):
     with open(jsonfile) as f:
         j = json.load(f)
     for e in j:
@@ -100,7 +100,7 @@ def understandThreadOpFormat(url):
     print ("selftext: %s" % (data["selftext"]))
 
 
-def checkManyThreadOps(jsonfile="comments.json"):
+def checkManyThreadOps(jsonfile="../comments.json"):
     with open(jsonfile) as f:
         j = json.load(f)
 
