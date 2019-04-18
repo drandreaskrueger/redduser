@@ -1,3 +1,5 @@
+
+example with whole trail of replies:
 ```
 curl --header "User-agent: redduser" https://www.reddit.com/r/politics/comments/bdwg0g/-/el29x7x/.json > test.json
 cat test.json | jq
@@ -24,9 +26,14 @@ cat test.json | jq '.[1].data.children[0].data.replies.data.children[0].data.rep
 cat test.json | jq '.[1].data.children[0].data.replies.data.children[0].data.replies.data.children[0].data | keys'
 cat test.json | jq '.[1].data.children[0].data.replies.data.children[0].data.replies.data.children[0].data.body'
 cat test.json | jq '.[1].data.children[0].data.replies.data.children[0].data.replies.data.children[0].data.name'
+```
 
+the last one, "t1_el2dl6f", turned into a URL and download:
+```
 curl --header "User-agent: redduser" https://www.reddit.com/r/politics/comments/bdwg0g/-/el2dl6f/.json > test.json
 cat test.json | jq '.[1].data.children[0].data'
 cat test.json | jq '.[1].data.children[0].data.name'
 cat test.json | jq '.[1].data.children[0].data.replies'
 ```
+
+
