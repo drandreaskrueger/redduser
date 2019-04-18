@@ -36,4 +36,8 @@ cat test.json | jq '.[1].data.children[0].data.name'
 cat test.json | jq '.[1].data.children[0].data.replies'
 ```
 
-
+comment with OP that has a title AND a selftext:
+```
+curl --header "User-agent: redduser" https://www.reddit.com/comments/b4znbi/-/ejg8fwk/.json | jq '.[0].data.children[0].data | .title + "##  ##" + .selftext'
+```
+so looks like the OP is always fully included in the comment.
